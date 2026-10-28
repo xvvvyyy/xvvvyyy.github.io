@@ -316,7 +316,6 @@
             margin-top: 5px;
         }
 
-        /* Counter cards (Page Views / Clicks) */
         .counter-value {
             font-size: 2.2rem;
             font-weight: bold;
@@ -1025,7 +1024,6 @@
             .hero h1 { font-size: 2.2rem; }
         }
 
-        /* Projects: full-width row */
         #projects-card { grid-column: 1 / -1; }
 
         #projects-card .projects-list {
@@ -1396,7 +1394,9 @@
 
         (function () {
             const fmt = new Intl.NumberFormat();
-            let pageViewCounted = false;
+            const COOLDOWN_MS = 5000;
+            const PV_KEY = 'pv_last_increment';
+            let initialized = false; 
 
             async function callCounter(name, method) {
                 const path = method === 'POST' ? '/' + name + '/up' : '/' + name;
@@ -1408,18 +1408,33 @@
                 return value;
             }
 
-            function show(valueEl, labelEl, value, label) {
-                if (value === null) {
-                    valueEl.textContent = 'N/A';
-                    valueEl.classList.add('is-muted');
-                } else {
-                    valueEl.textContent = fmt.format(value);
-                    valueEl.classList.remove('is-muted');
-                }
-                labelEl.textContent = label;
+            function createDisplay(valueEl, labelEl) {
+                let current = null;
+                return {
+                    apply(value, label) {
+                        if (current === null || value >= current) {
+                            current = value;
+                            valueEl.textContent = fmt.format(current);
+                            valueEl.classList.remove('is-muted');
+                        }
+                        if (label) labelEl.textContent = label;
+                    },
+                    fail(label) {
+                        if (current === null) {
+                            valueEl.textContent = 'N/A';
+                            valueEl.classList.add('is-muted');
+                        }
+                        labelEl.textContent = label;
+                    },
+                    label(text) { labelEl.textContent = text; },
+                    get value() { return current; }
+                };
             }
 
             window.addEventListener('DOMContentLoaded', () => {
+                if (initialized) return;
+                initialized = true;
+
                 const pvValue = document.getElementById('pageviews-value');
                 const pvLabel = document.getElementById('pageviews-label');
                 const ckValue = document.getElementById('clicks-value');
@@ -1427,53 +1442,86 @@
                 const ckBtn = document.getElementById('clicks-btn');
                 if (!pvValue || !pvLabel || !ckValue || !ckLabel || !ckBtn) return;
 
-                if (!pageViewCounted) {
-                    pageViewCounted = true;
-                    (async () => {
+                const pv = createDisplay(pvValue, pvLabel);
+                const ck = createDisplay(ckValue, ckLabel);
+
+                function pvCooldownActive() {
+                    try {
+                        const last = Number(sessionStorage.getItem(PV_KEY));
+                        const elapsed = Date.now() - last;
+                        return Number.isFinite(last) && last > 0 && elapsed >= 0 && elapsed < COOLDOWN_MS;
+                    } catch (e) { return false; }
+                }
+
+                (async () => {
+                    if (pvCooldownActive()) {
                         try {
-                            const v = await callCounter('pviews', 'POST');
-                            show(pvValue, pvLabel, v, 'Total visits');
+                            pv.apply(await callCounter('pviews', 'GET'), 'Total visits');
                         } catch (err) {
-                            try {
-                                const v = await callCounter('pviews', 'GET');
-                                show(pvValue, pvLabel, v, 'Total visits');
-                            } catch (err2) {
-                                show(pvValue, pvLabel, null, 'Unavailable');
-                            }
+                            pv.fail('Unavailable');
+                        }
+                        return;
+                    }
+                    try {
+                        const v = await callCounter('pviews', 'POST');
+                        try { sessionStorage.setItem(PV_KEY, String(Date.now())); } catch (e) {}
+                        pv.apply(v, 'Total visits');
+                    } catch (err) {
+                        try {
+                            pv.apply(await callCounter('pviews', 'GET'), 'Total visits (visit not counted)');
+                        } catch (err2) {
+                            pv.fail('Unavailable');
+                        }
+                    }
+                })();
+
+                const BTN_TEXT = ckBtn.textContent;
+                let busy = false;
+                let cooldownUntil = 0;
+
+                function startCooldown() {
+                    cooldownUntil = Date.now() + COOLDOWN_MS;
+                    (function tick() {
+                        const left = Math.ceil((cooldownUntil - Date.now()) / 1000);
+                        if (left > 0) {
+                            ckBtn.textContent = 'Wait ' + left + 's';
+                            setTimeout(tick, 250);
+                        } else {
+                            ckBtn.textContent = BTN_TEXT;
+                            ckBtn.disabled = false; 
+                            ck.label('Total clicks');
                         }
                     })();
                 }
 
-                let currentClicks = null;
                 (async () => {
                     try {
-                        currentClicks = await callCounter('pclicks', 'GET');
-                        show(ckValue, ckLabel, currentClicks, 'Total clicks');
+                        ck.apply(await callCounter('pclicks', 'GET'), 'Total clicks');
                     } catch (err) {
-                        show(ckValue, ckLabel, null, 'Unavailable');
+                        ck.fail('Unavailable');
                     }
                 })();
 
-                let busy = false;
                 ckBtn.disabled = false;
                 ckBtn.addEventListener('click', async () => {
-                    if (busy) return;
+                    if (busy || Date.now() < cooldownUntil) return;
                     busy = true;
-                    ckBtn.disabled = true;
-                    ckLabel.textContent = 'Updating...';
+                    ckBtn.disabled = true; 
+                    ck.label('Updating...');
+                    let ok = false;
                     try {
-                        let v = await callCounter('pclicks', 'POST');
-                        currentClicks = v;
-                        try {
-                            v = await callCounter('pclicks', 'GET');
-                            currentClicks = v;
-                        } catch (refreshErr) { /* keep the value the increment returned */ }
-                        show(ckValue, ckLabel, v, 'Total clicks');
+                        const v = await callCounter('pclicks', 'POST');
+                        ok = true;
+                        ck.apply(v, 'Wait a few seconds');
                     } catch (err) {
-                        show(ckValue, ckLabel, currentClicks, 'Could not count that click');
-                    } finally {
-                        busy = false;
-                        ckBtn.disabled = false;
+                        ck.label('Could not count that click');
+                    }
+                    busy = false;
+                    if (ok) {
+                        startCooldown();
+                        callCounter('pclicks', 'GET').then(v => ck.apply(v)).catch(() => {});
+                    } else {
+                        ckBtn.disabled = false; 
                     }
                 });
             });
