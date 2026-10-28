@@ -316,6 +316,46 @@
             margin-top: 5px;
         }
 
+        /* Counter cards (Page Views / Clicks) */
+        .counter-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-top: 10px;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+        }
+        .counter-value.is-muted {
+            color: var(--text-secondary);
+        }
+        .counter-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .counter-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .counter-btn:hover:not(:disabled) {
+            background: var(--hover-color);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+        .counter-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .weather-btns {
             display: flex;
             gap: 10px;
@@ -976,12 +1016,27 @@
             .span-2 { grid-column: span 1; }
             .about-card { grid-column: span 2; }
             .skills-card { grid-column: span 2; }
+            .things-card { grid-column: span 2; }
         }
         @media (max-width: 600px) {
             .grid { grid-template-columns: 1fr; }
             .about-card { grid-column: span 1; }
             .skills-card { grid-column: span 1; }
             .hero h1 { font-size: 2.2rem; }
+        }
+
+        /* Projects: full-width row */
+        #projects-card { grid-column: 1 / -1; }
+
+        #projects-card .projects-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        #projects-card .projects-list .project {
+            margin-top: 0;
         }
 
         #projects-card .project {
@@ -1200,7 +1255,7 @@
                 </div>
             </div>
             
-            <div class="card scroll-anim">
+            <div class="card things-card scroll-anim">
                 <h3>Things I Like Building</h3>
                 <div class="tags-container">
                     <span class="tag">Desktop Apps</span>
@@ -1212,11 +1267,31 @@
                 </div>
             </div>
 
-            <div class="card span-2 scroll-anim" id="projects-card">
+            <div class="card scroll-anim" id="pageviews-card">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    Page Views
+                </h3>
+                <div class="counter-value is-muted" id="pageviews-value" aria-live="polite">...</div>
+                <div class="counter-label" id="pageviews-label">Loading...</div>
+            </div>
+
+            <div class="card scroll-anim" id="clicks-card">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11.24V7.5a2.5 2.5 0 015 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
+                    Clicks
+                </h3>
+                <div class="counter-value is-muted" id="clicks-value" aria-live="polite">...</div>
+                <div class="counter-label" id="clicks-label">Loading...</div>
+                <button type="button" class="counter-btn" id="clicks-btn" disabled>Click me</button>
+            </div>
+
+            <div class="card scroll-anim" id="projects-card">
                 <h3>Projects</h3>
                 <p>Bum Tsa Dum</p>
                 <p>idk why i added this, i dont rlly make public projects lol. </p>
 
+                <div class="projects-list">
                 <a class="project" href="https://github.com/a1lolll/AnipmDiscordRpc" target="_blank" rel="noopener noreferrer">
                     <strong>AniPm Discord Extension</strong>
                     <span>hows what you're watching as a Discord Rich Presence</span>
@@ -1231,6 +1306,7 @@
                     <strong>Watchlist</strong>
                      <span>My ani.pm watchlist, synced from the site</span>
                 </a>
+                </div>
             </div>
 
         </section>
@@ -1314,6 +1390,94 @@
                 });
             }
         });
+
+
+        const COUNTER_API = "https://count.julianpaktjemoeder.workers.dev";
+
+        (function () {
+            const fmt = new Intl.NumberFormat();
+            let pageViewCounted = false;
+
+            async function callCounter(name, method) {
+                const path = method === 'POST' ? '/' + name + '/up' : '/' + name;
+                const res = await fetch(COUNTER_API + path, { method: method });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const value = json && json.data ? json.data.up_count : undefined;
+                if (typeof value !== 'number') throw new Error('Unexpected response');
+                return value;
+            }
+
+            function show(valueEl, labelEl, value, label) {
+                if (value === null) {
+                    valueEl.textContent = 'N/A';
+                    valueEl.classList.add('is-muted');
+                } else {
+                    valueEl.textContent = fmt.format(value);
+                    valueEl.classList.remove('is-muted');
+                }
+                labelEl.textContent = label;
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                const pvValue = document.getElementById('pageviews-value');
+                const pvLabel = document.getElementById('pageviews-label');
+                const ckValue = document.getElementById('clicks-value');
+                const ckLabel = document.getElementById('clicks-label');
+                const ckBtn = document.getElementById('clicks-btn');
+                if (!pvValue || !pvLabel || !ckValue || !ckLabel || !ckBtn) return;
+
+                if (!pageViewCounted) {
+                    pageViewCounted = true;
+                    (async () => {
+                        try {
+                            const v = await callCounter('pviews', 'POST');
+                            show(pvValue, pvLabel, v, 'Total visits');
+                        } catch (err) {
+                            try {
+                                const v = await callCounter('pviews', 'GET');
+                                show(pvValue, pvLabel, v, 'Total visits');
+                            } catch (err2) {
+                                show(pvValue, pvLabel, null, 'Unavailable');
+                            }
+                        }
+                    })();
+                }
+
+                let currentClicks = null;
+                (async () => {
+                    try {
+                        currentClicks = await callCounter('pclicks', 'GET');
+                        show(ckValue, ckLabel, currentClicks, 'Total clicks');
+                    } catch (err) {
+                        show(ckValue, ckLabel, null, 'Unavailable');
+                    }
+                })();
+
+                let busy = false;
+                ckBtn.disabled = false;
+                ckBtn.addEventListener('click', async () => {
+                    if (busy) return;
+                    busy = true;
+                    ckBtn.disabled = true;
+                    ckLabel.textContent = 'Updating...';
+                    try {
+                        let v = await callCounter('pclicks', 'POST');
+                        currentClicks = v;
+                        try {
+                            v = await callCounter('pclicks', 'GET');
+                            currentClicks = v;
+                        } catch (refreshErr) { /* keep the value the increment returned */ }
+                        show(ckValue, ckLabel, v, 'Total clicks');
+                    } catch (err) {
+                        show(ckValue, ckLabel, currentClicks, 'Could not count that click');
+                    } finally {
+                        busy = false;
+                        ckBtn.disabled = false;
+                    }
+                });
+            });
+        })();
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
