@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>a1 | Watchlist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:rgb(0,0,0)}
+body{min-height:100vh;background:transparent;color:rgb(255,255,255);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.video-bg{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.video-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:-1}
+main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:40px 20px 80px}
+.head{display:flex;align-items:baseline;gap:16px;margin-bottom:24px}
+.head h1{font-size:2rem;font-weight:800;letter-spacing:-1px}
+.updated{margin-left:auto;font-size:13px;color:rgba(255,255,255,0.45)}
+.panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px;margin-bottom:22px;background:rgba(255,255,255,0.05);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{padding:8px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:999px;color:rgba(255,255,255,0.75);font:inherit;font-size:14px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tab:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2)}
+.tab.on,.tab.on:hover{background:rgba(255,255,255,0.88);border-color:rgba(255,255,255,0.88);color:rgb(0,0,0)}
+.tab span{margin-left:7px;font-size:12px;opacity:.55}
+.controls{display:flex;gap:8px}
+input,select{padding:9px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgb(255,255,255);font:inherit;font-size:14px;outline:none}
+input:focus,select:focus,.tab:focus-visible,.back:focus-visible{border-color:rgba(255,255,255,0.5)}
+input::placeholder{color:rgba(255,255,255,0.4)}
+select option{background:rgb(20,20,20);color:rgb(255,255,255)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 16px}
+.art{position:relative;aspect-ratio:0.667;overflow:hidden;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;transition:border-color .15s}
+.card:hover .art{border-color:rgba(255,255,255,0.3)}
+.art img{display:block;width:100%;height:100%;object-fit:cover}
+.art::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,0.88),rgba(0,0,0,0) 55%)}
+.info{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:10px}
+.name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600}
+.facts{display:flex;align-items:center;gap:8px;margin-top:2px;font-size:11px;color:rgba(255,255,255,0.65)}
+.facts .score{margin-left:auto;color:rgb(255,255,255)}
+.watched{margin-top:7px;font-size:12px;color:rgba(255,255,255,0.45)}
+.empty{padding:60px 0;text-align:center;color:rgba(255,255,255,0.5)}
+@media (max-width:600px){
+.head{flex-wrap:wrap;gap:6px 16px}
+.updated{margin-left:0;width:100%}
+.controls{width:100%}
+.controls input{flex:1;min-width:0}
+.grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+</style>
+</head>
+<body>
+<video class="video-bg" src="../Background.mp4" autoplay loop muted playsinline></video>
+<div class="video-overlay"></div>
+<main>
+<header class="head">
+<h1>Watchlist</h1>
+<span class="updated" id="updated"></span>
+</header>
+<section class="panel">
+<div class="tabs" id="tabs"></div>
+<div class="controls">
+<input id="search" type="search" placeholder="Search list" autocomplete="off">
+<select id="sort" aria-label="Sort">
+<option value="recent">Recently added</option>
+<option value="title">Title</option>
+<option value="score">Score</option>
+<option value="year">Year</option>
+</select>
+</div>
+</section>
+<section class="grid" id="grid"></section>
+<p class="empty" id="empty" hidden></p>
+</main>
+<script>
+const labels = { all: 'All', watching: 'Watching', plan: 'Plan to watch', completed: 'Completed', hold: 'On hold' };
+const order = ['watching', 'plan', 'completed', 'hold'];
+const aliases = { on_hold: 'hold', onhold: 'hold', 'on-hold': 'hold', paused: 'hold', planned: 'plan', plan_to_watch: 'plan', current: 'watching', done: 'completed' };
+const sorters = {
+  recent: (a, b) => (b.addedAt || 0) - (a.addedAt || 0),
+  title: (a, b) => a.title.localeCompare(b.title),
+  score: (a, b) => (b.score || 0) - (a.score || 0),
+  year: (a, b) => (b.year || 0) - (a.year || 0)
+};
+
+const tabsEl = document.getElementById('tabs');
+const gridEl = document.getElementById('grid');
+const emptyEl = document.getElementById('empty');
+const searchEl = document.getElementById('search');
+const sortEl = document.getElementById('sort');
+const updatedEl = document.getElementById('updated');
+
+let items = [];
+let active = 'all';
+
+function statusOf(item) {
+  const raw = String(item.status || '').toLowerCase();
+  return aliases[raw] || raw;
+}
+
+function labelOf(key) {
+  return labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function coverOf(item) {
+  return item.cover && item.cover.startsWith('/') ? 'https://ani.pm' + item.cover : item.cover;
+}
+
+function visibleItems() {
+  const query = searchEl.value.trim().toLowerCase();
+  return items
+    .filter((item) => active === 'all' || statusOf(item) === active)
+    .filter((item) => !query || item.title.toLowerCase().includes(query) || (item.native || '').toLowerCase().includes(query))
+    .sort(sorters[sortEl.value]);
+}
+
+function renderTabs() {
+  const counts = { all: items.length };
+  items.forEach((item) => {
+    const key = statusOf(item);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const extra = Object.keys(counts).filter((key) => key !== 'all' && !order.includes(key));
+  tabsEl.textContent = '';
+  ['all'].concat(order, extra).forEach((key) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = key === active ? 'tab on' : 'tab';
+    tab.textContent = labelOf(key);
+    const count = document.createElement('span');
+    count.textContent = counts[key] || 0;
+    tab.appendChild(count);
+    tab.addEventListener('click', () => {
+      active = key;
+      render();
+    });
+    tabsEl.appendChild(tab);
+  });
+}
+
+function buildCard(item) {
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const art = document.createElement('div');
+  art.className = 'art';
+  const source = coverOf(item);
+  if (source) {
+    const image = document.createElement('img');
+    image.loading = 'lazy';
+    image.alt = '';
+    image.referrerPolicy = 'no-referrer';
+    image.addEventListener('error', () => image.remove());
+    image.src = source;
+    art.appendChild(image);
+  }
+
+  const info = document.createElement('div');
+  info.className = 'info';
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.textContent = item.title;
+  name.title = item.title;
+  const facts = document.createElement('div');
+  facts.className = 'facts';
+  [item.type, item.year].forEach((value) => {
+    if (!value) return;
+    const span = document.createElement('span');
+    span.textContent = value;
+    facts.appendChild(span);
+  });
+  if (item.score) {
+    const score = document.createElement('span');
+    score.className = 'score';
+    score.textContent = item.score.toFixed(1) + ' \u2605';
+    facts.appendChild(score);
+  }
+  info.appendChild(name);
+  info.appendChild(facts);
+  art.appendChild(info);
+
+  const watched = document.createElement('div');
+  watched.className = 'watched';
+  watched.textContent = (item.progress || 0) + '/' + (item.episodeCount || '?') + ' watched';
+
+  card.appendChild(art);
+  card.appendChild(watched);
+  return card;
+}
+
+function render() {
+  renderTabs();
+  const list = visibleItems();
+  const fragment = document.createDocumentFragment();
+  list.forEach((item) => fragment.appendChild(buildCard(item)));
+  gridEl.textContent = '';
+  gridEl.appendChild(fragment);
+  emptyEl.hidden = list.length > 0;
+  if (!list.length) {
+    emptyEl.textContent = items.length ? 'Nothing matches your search.' : emptyEl.textContent;
+  }
+}
+
+searchEl.addEventListener('input', render);
+sortEl.addEventListener('change', render);
+
+fetch('watchlist.json', { cache: 'no-store' })
+  .then((response) => {
+    if (!response.ok) throw new Error('missing');
+    return response.json();
+  })
+  .then((data) => {
+    items = data.items || [];
+    if (data.updatedAt) {
+      updatedEl.textContent = 'Updated ' + new Date(data.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    }
+    render();
+  })
+  .catch(() => {
+    emptyEl.textContent = 'No watchlist yet.';
+    emptyEl.hidden = false;
+  });
+</script>
+</body>
+</html>
