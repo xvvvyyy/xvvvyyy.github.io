@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="charcoal">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TsuneBotChat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root,
+    [data-theme="charcoal"] {
+      --bg: #18191c;
+      --surface: #202225;
+      --panel: #292b2f;
+      --hover: #313338;
+      --border: #34373c;
+      --border-strong: #484c52;
+      --text: #eceeef;
+      --text-muted: #9fa3aa;
+      --text-dim: #6e727a;
+      --btn-bg: #d8dade;
+      --btn-fg: #18191c;
+      --btn-hover: #eceeef;
+      --accent: #d8dade;
+      --badge-bg: #2f3136;
+      --badge-fg: #dcddde;
+      --code-bg: #141517;
+    }
+
+    [data-theme="pitch-black"] {
+      --bg: #090909;
+      --surface: #121212;
+      --panel: #1a1a1a;
+      --hover: #222222;
+      --border: #262626;
+      --border-strong: #3a3a3a;
+      --text: #f2f2f2;
+      --text-muted: #9a9a9a;
+      --text-dim: #666666;
+      --btn-bg: #e5e5e5;
+      --btn-fg: #090909;
+      --btn-hover: #ffffff;
+      --accent: #e5e5e5;
+      --badge-bg: #222222;
+      --badge-fg: #e5e5e5;
+      --code-bg: #0e0e0e;
+    }
+
+    [data-theme="ash-grey"] {
+      --bg: #dcdfe4;
+      --surface: #e8eaee;
+      --panel: #cfd3da;
+      --hover: #c3c8d0;
+      --border: #b4b9c2;
+      --border-strong: #9299a5;
+      --text: #181a1d;
+      --text-muted: #4b5058;
+      --text-dim: #6c727d;
+      --btn-bg: #2b303a;
+      --btn-fg: #f4f5f7;
+      --btn-hover: #181a1d;
+      --accent: #2b303a;
+      --badge-bg: #cfd3da;
+      --badge-fg: #181a1d;
+      --code-bg: #e2e5ea;
+    }
+
+    [data-theme="paper-white"] {
+      --bg: #f6f6f7;
+      --surface: #ffffff;
+      --panel: #ededef;
+      --hover: #e3e3e6;
+      --border: #d6d6da;
+      --border-strong: #b8b8be;
+      --text: #141416;
+      --text-muted: #56565e;
+      --text-dim: #84848e;
+      --btn-bg: #18181b;
+      --btn-fg: #ffffff;
+      --btn-hover: #2c2c31;
+      --accent: #18181b;
+      --badge-bg: #ededef;
+      --badge-fg: #18181b;
+      --code-bg: #f0f0f2;
+    }
+
+    [data-theme="tsune"] {
+      --bg: #16101c;
+      --surface: #201729;
+      --panel: #2b1f37;
+      --hover: #352644;
+      --border: #422e54;
+      --border-strong: #5e4178;
+      --text: #f8eaf2;
+      --text-muted: #c4a7ba;
+      --text-dim: #8e7086;
+      --btn-bg: #e879a9;
+      --btn-fg: #16101c;
+      --btn-hover: #f28fb9;
+      --accent: #c084fc;
+      --badge-bg: #362447;
+      --badge-fg: #c084fc;
+      --code-bg: #120d17;
+    }
+
+    [data-theme="forest"] {
+      --bg: #0e1712;
+      --surface: #15221b;
+      --panel: #1d2e25;
+      --hover: #24392e;
+      --border: #2c4437;
+      --border-strong: #3f614f;
+      --text: #e6f0ea;
+      --text-muted: #9eb8aa;
+      --text-dim: #698576;
+      --btn-bg: #52a878;
+      --btn-fg: #0b140f;
+      --btn-hover: #64ba8a;
+      --accent: #7ec49b;
+      --badge-bg: #1f3328;
+      --badge-fg: #7ec49b;
+      --code-bg: #0b120e;
+    }
+
+    * {
+      box-shadow: none !important;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .bg-app { background-color: var(--bg); }
+    .bg-surface { background-color: var(--surface); }
+    .bg-panel { background-color: var(--panel); }
+    .border-base { border-color: var(--border); }
+    .border-strong { border-color: var(--border-strong); }
+    .text-main { color: var(--text); }
+    .text-muted { color: var(--text-muted); }
+    .text-dim { color: var(--text-dim); }
+    .text-accent { color: var(--accent); }
+
+    .btn-flat {
+      background-color: var(--btn-bg);
+      color: var(--btn-fg);
+      transition: background-color 0.12s ease;
+    }
+    .btn-flat:hover:not(:disabled) {
+      background-color: var(--btn-hover);
+    }
+    .btn-flat:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      background-color: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background-color: var(--hover);
+      border-color: var(--border-strong);
+    }
+
+    .channel-item {
+      border: 1px solid transparent;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+    .channel-item:hover {
+      background-color: var(--hover);
+    }
+    .channel-item.active {
+      background-color: var(--panel);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .msg-row:hover {
+      background-color: var(--hover);
+    }
+    .msg-row:hover .msg-tools {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .inline-code {
+      font-size: 0.84em;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.08rem 0.32rem;
+      border-radius: 4px;
+    }
+
+    .code-block {
+      font-size: 0.82em;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      margin: 0.35rem 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .mention-tag {
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 0 0.3rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-strong);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col">
+
+  <header class="h-12 shrink-0 bg-surface border-b border-base px-3 sm:px-4 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <button id="sidebarOpenBtn" type="button" aria-label="Open channels" class="md:hidden btn-ghost p-1.5 rounded text-muted hover:text-main">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <span class="text-sm font-semibold tracking-tight">TsuneBotChat</span>
+
+      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-panel border border-base text-[11px] mono text-muted truncate">
+        <span id="statusDot" class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: var(--accent);"></span>
+        <span id="statusBadgeText" class="truncate">Demo Mode</span>
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="refreshBtn" type="button" title="Refresh messages" class="btn-ghost p-1.5 rounded text-muted hover:text-main focus:outline-none">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+          <path d="M16 16h5v5"></path>
+        </svg>
+      </button>
+
+      <button id="settingsBtn" type="button" title="Settings" class="btn-ghost px-2.5 py-1.5 rounded inline-flex items-center gap-1.5 text-xs font-medium focus:outline-none">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span class="hidden sm:inline">Settings</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="noticeBar" class="hidden bg-surface border-b border-base px-4 py-1.5 text-xs flex items-center justify-between gap-2">
+    <span id="noticeText" class="text-muted"></span>
+    <button id="noticeActionBtn" type="button" class="underline text-main shrink-0">Open settings</button>
+  </div>
+
+  <div class="flex-1 flex min-h-0 relative">
+    <div id="sidebarBackdrop" class="hidden fixed inset-0 z-30 bg-black/55 md:hidden"></div>
+
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 shrink-0 bg-surface border-r border-base flex flex-col -translate-x-full md:translate-x-0 transition-transform duration-150">
+      <div class="p-3 border-b border-base flex items-center justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <label for="guildSelect" class="block text-[10px] uppercase tracking-wider text-dim mb-1">Server</label>
+          <select id="guildSelect" class="w-full bg-panel border border-base focus:border-strong rounded px-2.5 py-1.5 text-xs font-medium text-main focus:outline-none truncate">
+            <option value="demo-guild">Tsune Sandbox</option>
+          </select>
+        </div>
+        <button id="sidebarCloseBtn" type="button" aria-label="Close sidebar" class="md:hidden text-muted hover:text-main px-1.5 py-1 text-sm self-end">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-4">
+        <div>
+          <div class="flex items-center justify-between text-[10px] uppercase tracking-wider text-dim px-1 mb-1.5">
+            <span>Text Channels</span>
+            <span id="channelCount" class="mono">2</span>
+          </div>
+          <div id="channelList" class="space-y-0.5"></div>
+        </div>
+
+        <div class="pt-3 border-t border-base">
+          <label for="directChannelInput" class="block text-[10px] uppercase tracking-wider text-dim px-1 mb-1.5">Direct Channel ID</label>
+          <div class="flex gap-1.5">
+            <input
+              id="directChannelInput"
+              type="text"
+              placeholder="Channel ID..."
+              class="flex-1 min-w-0 bg-panel border border-base focus:border-strong rounded px-2.5 py-1.5 mono text-xs text-main focus:outline-none"
+            />
+            <button id="useChannelIdBtn" type="button" class="btn-ghost px-2.5 py-1.5 rounded text-xs font-medium shrink-0">
+              Go
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-base bg-app/40 flex items-center gap-2.5">
+        <div id="botAvatar" class="w-8 h-8 rounded bg-panel border border-base flex items-center justify-center text-xs font-semibold shrink-0 overflow-hidden">
+          T
+        </div>
+        <div class="min-w-0 flex-1">
+          <div id="botNameLabel" class="text-xs font-medium truncate">TsuneBot</div>
+          <div id="sidebarStatusSub" class="text-[11px] mono text-dim truncate">local demo</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-app">
+      <div class="h-11 shrink-0 border-b border-base px-4 sm:px-6 flex items-center justify-between gap-3 bg-app">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-muted text-sm font-medium">#</span>
+          <h1 id="channelHeading" class="text-sm font-semibold truncate">general</h1>
+          <span class="text-dim hidden sm:inline">|</span>
+          <p id="channelSubtext" class="text-xs text-muted truncate hidden sm:block">Demo mode active. Open Settings to connect a Discord bot token.</p>
+        </div>
+      </div>
+
+      <div id="feedScroll" class="flex-1 overflow-y-auto px-3 sm:px-6 py-4">
+        <div id="messageList" class="space-y-1 max-w-4xl"></div>
+      </div>
+
+      <footer class="shrink-0 px-3 sm:px-6 pb-4 pt-2 bg-app">
+        <div class="max-w-4xl">
+          <div id="replyBanner" class="hidden bg-panel border border-b-0 border-base rounded-t-md px-3 py-1.5 text-xs flex items-center justify-between gap-2">
+            <div class="truncate text-muted">
+              Replying to <span id="replyAuthor" class="text-main font-medium"></span>
+              <span id="replySnippet" class="ml-1 text-dim"></span>
+            </div>
+            <button id="cancelReplyBtn" type="button" class="text-muted hover:text-main px-1">✕</button>
+          </div>
+
+          <div id="composerWrap" class="bg-surface border border-base rounded-md p-2.5">
+            <div class="flex items-end gap-2">
+              <textarea
+                id="msgInput"
+                rows="1"
+                maxlength="2000"
+                placeholder="Message #general..."
+                class="flex-1 bg-transparent resize-none text-sm text-main placeholder:text-zinc-500 focus:outline-none max-h-36 py-1 px-1"
+              ></textarea>
+              <button id="sendBtn" type="button" disabled class="btn-flat px-3.5 py-1.5 rounded text-xs font-medium shrink-0">
+                Send
+              </button>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-dim mt-1.5 pt-1.5 border-t border-base px-1">
+              <span>Enter to send · Shift+Enter for newline</span>
+              <span id="charCount" class="mono">0/2000</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-5">
+    <div role="dialog" aria-modal="true" class="bg-surface border border-base rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-4 py-3 border-b border-base flex items-center justify-between">
+        <h2 class="text-sm font-semibold">Settings</h2>
+        <button id="closeSettingsBtn" type="button" class="text-muted hover:text-main text-sm px-1.5 py-0.5">✕</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-4 text-xs flex-1">
+        <div>
+          <label class="block font-medium text-muted mb-2">Theme</label>
+          <div id="themeOptions" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="pt-3 border-t border-base">
+          <label for="tokenInput" class="block font-medium text-muted mb-1">Discord Bot Token</label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                id="tokenInput"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Paste Discord bot token"
+                class="w-full bg-panel border border-base focus:border-strong rounded px-3 py-2 pr-12 mono text-xs text-main focus:outline-none"
+              />
+              <button id="toggleTokenBtn" type="button" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted hover:text-main">
+                Show
+              </button>
+            </div>
+            <button id="disconnectBtn" type="button" class="btn-ghost px-3 py-2 rounded font-medium shrink-0 hidden">
+              Clear
+            </button>
+          </div>
+          <p id="botStatusLine" class="text-[11px] text-dim mt-1">Stored locally in your browser.</p>
+        </div>
+
+        <div>
+          <label for="proxyInput" class="block font-medium text-muted mb-1">CORS Proxy URL (optional)</label>
+          <div class="flex gap-2">
+            <input
+              id="proxyInput"
+              type="text"
+              placeholder="e.g. https://corsproxy.io/?"
+              class="flex-1 bg-panel border border-base focus:border-strong rounded px-3 py-2 mono text-main focus:outline-none"
+            />
+            <button id="testConnBtn" type="button" class="btn-flat px-3 py-2 rounded font-medium shrink-0">
+              Test Connection
+            </button>
+          </div>
+          <p class="text-[11px] text-dim mt-1">Browsers block direct requests to discord.com/api/v10 with bot tokens unless routed through a CORS proxy.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-base">
+          <div>
+            <label for="pollSelect" class="block font-medium text-muted mb-1">Auto-refresh</label>
+            <select id="pollSelect" class="w-full bg-panel border border-base focus:border-strong rounded px-2.5 py-2 text-main focus:outline-none">
+              <option value="0">Off</option>
+              <option value="3000">3s</option>
+              <option value="5000" selected>5s</option>
+              <option value="10000">10s</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-muted mb-1">Connection Mode</label>
+            <button id="modeToggleBtn" type="button" class="btn-ghost w-full px-3 py-2 rounded font-medium text-left">
+              Mode: Demo Mode
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-4 py-3 border-t border-base bg-app flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-muted">
+        <div>
+          <span>made by; !a1 lol (barkbarkdoggy)</span>
+          <span class="mx-1.5 text-dim">·</span>
+          <a href="https://xvvvyyy.github.io" target="_blank" rel="noopener" class="underline hover:text-main">xvvvyyy.github.io</a>
+          <span class="mx-1.5 text-dim">·</span>
+          <a href="https://github.com/xvvvyyy" target="_blank" rel="noopener" class="underline hover:text-main">github.com/xvvvyyy</a>
+        </div>
+        <button id="saveBtn" type="button" class="btn-flat px-4 py-1.5 rounded text-xs font-medium self-end sm:self-auto">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden fixed bottom-4 right-4 z-50 bg-panel border border-strong text-main text-xs px-3 py-2 rounded"></div>
+
+  <script>
+    (() => {
+      const STORE_KEY = 'tsunebotchat_v1';
+
+      const THEMES = [
+        { id: 'pitch-black', label: 'Pitch Black', primary: '#090909', secondary: '#e5e5e5' },
+        { id: 'charcoal', label: 'Charcoal', primary: '#18191c', secondary: '#d8dade' },
+        { id: 'ash-grey', label: 'Ash Grey', primary: '#dcdfe4', secondary: '#2b303a' },
+        { id: 'paper-white', label: 'Paper White', primary: '#f6f6f7', secondary: '#18181b' },
+        { id: 'tsune', label: 'Tsune', primary: '#16101c', secondary: '#e879a9' },
+        { id: 'forest', label: 'Forest', primary: '#0e1712', secondary: '#52a878' }
+      ];
+
+      const DEMO_GUILDS = [
+        { id: 'demo-guild', name: 'Tsune Sandbox' }
+      ];
+
+      const DEMO_CHANNELS = [
+        { id: 'demo-general', name: 'general', topic: 'Demo mode active. Open Settings to connect a Discord bot token.' },
+        { id: 'demo-logs', name: 'bot-logs', topic: 'Secondary test channel for bot responses.' },
+        { id: 'demo-commands', name: 'commands', topic: 'Test replies, formatting, and message deletion.' }
+      ];
+
+      function initialDemoMessages() {
+        const now = Date.now();
+        return {
+          'demo-general': [
+            {
+              id: '1001',
+              content: 'Welcome to TsuneBotChat. Everything works locally right out of the box.',
+              timestamp: new Date(now - 720000).toISOString(),
+              author: { id: 'u1', username: 'alex', bot: false, avatar: null },
+              attachments: []
+            },
+            {
+              id: '1002',
+              content: 'I-it is not like I built this interface just for you or anything... Click Settings in the top-right to switch themes or connect your bot token.',
+              timestamp: new Date(now - 600000).toISOString(),
+              author: { id: 'bot-local', username: 'TsuneBot', bot: true, avatar: null },
+              referenced_message: {
+                id: '1001',
+                content: 'Welcome to TsuneBotChat. Everything works locally right out of the box.',
+                author: { id: 'u1', username: 'alex' }
+              },
+              attachments: []
+            },
+            {
+              id: '1003',
+              content: 'Supports `inline code`, fenced blocks:\n```js\nclient.login(BOT_TOKEN);\n```\nand message replies.',
+              timestamp: new Date(now - 180000).toISOString(),
+              author: { id: 'u2', username: 'sam', bot: false, avatar: null },
+              attachments: []
+            }
+          ],
+          'demo-logs': [
+            {
+              id: '2001',
+              content: 'Outbound relay ready.',
+              timestamp: new Date(now - 300000).toISOString(),
+              author: { id: 'bot-local', username: 'TsuneBot', bot: true, avatar: null },
+              attachments: []
+            }
+          ],
+          'demo-commands': [
+            {
+              id: '3001',
+              content: 'Hover any message to reply, or delete messages sent by your bot.',
+              timestamp: new Date(now - 240000).toISOString(),
+              author: { id: 'bot-local', username: 'TsuneBot', bot: true, avatar: null },
+              attachments: []
+            }
+          ]
+        };
+      }
+
+      // saved settings
+      const state = {
+        token: '',
+        proxy: '',
+        guildId: 'demo-guild',
+        channelId: 'demo-general',
+        theme: 'charcoal',
+        pollMs: 5000,
+        demoMode: true,
+        botUser: { id: 'bot-local', username: 'TsuneBot', avatar: null },
+        guilds: [...DEMO_GUILDS],
+        channels: [...DEMO_CHANNELS],
+        messages: [],
+        demoData: initialDemoMessages(),
+        replyTo: null,
+        timer: null,
+        busy: false
+      };
+
+      const $ = id => document.getElementById(id);
+
+      function loadSettings() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+          if (!saved) return;
+          if (saved.token) state.token = saved.token;
+          if (typeof saved.proxy === 'string') state.proxy = saved.proxy;
+          if (saved.guildId) state.guildId = saved.guildId;
+          if (saved.channelId) state.channelId = saved.channelId;
+          if (saved.theme && THEMES.some(t => t.id === saved.theme)) state.theme = saved.theme;
+          if (typeof saved.pollMs === 'number') state.pollMs = saved.pollMs;
+          if (typeof saved.demoMode === 'boolean') state.demoMode = saved.demoMode;
+          else if (state.token) state.demoMode = false;
+        } catch (_) {}
+      }
+
+      function saveSettings() {
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify({
+            token: state.token,
+            proxy: state.proxy,
+            guildId: state.guildId,
+            channelId: state.channelId,
+            theme: state.theme,
+            pollMs: state.pollMs,
+            demoMode: state.demoMode
+          }));
+        } catch (_) {}
+      }
+
+      let toastTimer = null;
+      function notify(msg) {
+        const el = $('toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+      }
+
+      function setNotice(text) {
+        const bar = $('noticeBar');
+        if (!text) {
+          bar.classList.add('hidden');
+          return;
+        }
+        $('noticeText').textContent = text;
+        bar.classList.remove('hidden');
+      }
+
+      function applyTheme(id) {
+        state.theme = id;
+        document.documentElement.setAttribute('data-theme', id);
+        document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+          const active = btn.dataset.themeBtn === id;
+          btn.classList.toggle('border-strong', active);
+          btn.classList.toggle('bg-panel', active);
+        });
+      }
+
+      function renderThemeButtons() {
+        $('themeOptions').innerHTML = THEMES.map(t => `
+          <button type="button" data-theme-btn="${t.id}" class="flex items-center gap-2 px-2.5 py-2 rounded border border-base hover:border-strong text-left transition">
+            <span class="w-4 h-4 rounded-sm border border-base shrink-0 flex overflow-hidden">
+              <span class="w-1/2 h-full" style="background:${t.primary}"></span>
+              <span class="w-1/2 h-full" style="background:${t.secondary}"></span>
+            </span>
+            <span class="text-main font-medium truncate">${t.label}</span>
+          </button>
+        `).join('');
+
+        $('themeOptions').querySelectorAll('[data-theme-btn]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            applyTheme(btn.dataset.themeBtn);
+            saveSettings();
+          });
+        });
+      }
+
+      // discord api helper
+      async function discordApi(path, options = {}) {
+        // bot login token
+        const token = state.token.trim();
+        if (!token) throw new Error('No bot token set');
+
+        const base = 'https://discord.com/api/v10' + path;
+        const proxy = state.proxy.trim();
+        let url = base;
+        if (proxy) {
+          url = (proxy.endsWith('?') || proxy.endsWith('='))
+            ? proxy + encodeURIComponent(base)
+            : proxy.replace(/\/+$/, '') + path;
+        }
+
+        let res;
+        try {
+          res = await fetch(url, {
+            method: options.method || 'GET',
+            headers: {
+              'Authorization': `Bot ${token}`,
+              ...(options.body ? { 'Content-Type': 'application/json' } : {})
+            },
+            body: options.body ? JSON.stringify(options.body) : undefined
+          });
+        } catch (_) {
+          setNotice('Request blocked by browser CORS. Add a CORS proxy URL in Settings.');
+          $('statusBadgeText').textContent = 'CORS Error';
+          throw new Error('CORS / network blocked');
+        }
+
+        if (res.status === 204) return null;
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          if (res.status === 401) {
+            $('statusBadgeText').textContent = 'Invalid Token';
+            throw new Error('Invalid bot token (401)');
+          }
+          throw new Error(data?.message || `Discord error ${res.status}`);
+        }
+        setNotice('');
+        return data;
+      }
+
+      async function connectBot(silent = false) {
+        const raw = $('tokenInput').value.trim();
+        if (!raw) {
+          if (!silent) notify('Enter a bot token first');
+          return;
+        }
+        state.token = raw;
+        state.proxy = $('proxyInput').value.trim();
+        state.demoMode = false;
+        $('testConnBtn').disabled = true;
+
+        try {
+          const me = await discordApi('/users/@me');
+          state.botUser = me;
+          const guilds = await discordApi('/users/@me/guilds');
+          state.guilds = Array.isArray(guilds) ? guilds : [];
+
+          $('botStatusLine').textContent = `Connected as ${me.username} (${me.id})`;
+          $('disconnectBtn').classList.remove('hidden');
+          populateGuilds();
+
+          if (state.guilds.length > 0) {
+            const gId = state.guilds.some(g => g.id === state.guildId) ? state.guildId : state.guilds[0].id;
+            state.guildId = gId;
+            $('guildSelect').value = gId;
+            await loadChannels(gId, true);
+          } else {
+            state.channels = [];
+            renderChannelList();
+          }
+
+          updateStatusUI();
+          saveSettings();
+          if (!silent) notify(`Connected as ${me.username}`);
+        } catch (err) {
+          if (!silent) notify(err.message);
+        } finally {
+          $('testConnBtn').disabled = false;
+        }
+      }
+
+      function enableDemoMode() {
+        state.demoMode = true;
+        state.botUser = { id: 'bot-local', username: 'TsuneBot', avatar: null };
+        state.guilds = [...DEMO_GUILDS];
+        state.guildId = 'demo-guild';
+        state.channels = [...DEMO_CHANNELS];
+        state.channelId = 'demo-general';
+        populateGuilds();
+        renderChannelList();
+        updateStatusUI();
+        setNotice('');
+        saveSettings();
+        loadMessages(true);
+      }
+
+      function clearToken() {
+        state.token = '';
+        $('tokenInput').value = '';
+        $('botStatusLine').textContent = 'Token cleared. Switched to Demo Mode.';
+        $('disconnectBtn').classList.add('hidden');
+        enableDemoMode();
+      }
+
+      function populateGuilds() {
+        if (!state.guilds.length) {
+          $('guildSelect').innerHTML = '<option value="">No servers available</option>';
+          return;
+        }
+        $('guildSelect').innerHTML = state.guilds
+          .map(g => `<option value="${esc(g.id)}">${esc(g.name)}</option>`)
+          .join('');
+        if (state.guildId) $('guildSelect').value = state.guildId;
+      }
+
+      async function loadChannels(guildId, autoPick = false) {
+        if (!guildId) return;
+        if (state.demoMode) {
+          state.channels = [...DEMO_CHANNELS];
+          renderChannelList();
+          if (autoPick) await selectChannel('demo-general');
+          return;
+        }
+        try {
+          const list = await discordApi(`/guilds/${guildId}/channels`);
+          state.channels = (Array.isArray(list) ? list : [])
+            .filter(c => c.type === 0 || c.type === 5)
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+            .map(c => ({ id: c.id, name: c.name, topic: c.topic || '' }));
+          renderChannelList();
+          if (autoPick && state.channels.length) {
+            const pick = state.channels.some(c => c.id === state.channelId) ? state.channelId : state.channels[0].id;
+            await selectChannel(pick);
+          }
+        } catch (err) {
+          notify(err.message);
+        }
+      }
+
+      function renderChannelList() {
+        $('channelCount').textContent = String(state.channels.length);
+        if (!state.channels.length) {
+          $('channelList').innerHTML = '<p class="text-xs text-dim px-2 py-2">No text channels loaded.</p>';
+          return;
+        }
+        $('channelList').innerHTML = state.channels.map(c => {
+          const active = c.id === state.channelId;
+          return `
+            <button
+              type="button"
+              data-ch="${esc(c.id)}"
+              class="channel-item ${active ? 'active' : 'text-muted'} w-full px-2.5 py-1.5 rounded text-left text-xs flex items-center gap-1.5 truncate"
+            >
+              <span class="text-dim shrink-0">#</span>
+              <span class="truncate font-medium">${esc(c.name)}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      async function selectChannel(id) {
+        if (!id) return;
+        state.channelId = id;
+        clearReply();
+        renderChannelList();
+        updateStatusUI();
+        closeSidebar();
+        saveSettings();
+        await loadMessages(true);
+      }
+
+      async function loadMessages(scrollDown = false) {
+        if (state.busy) return;
+        state.busy = true;
+        try {
+          if (state.demoMode) {
+            state.messages = [...(state.demoData[state.channelId] || [])];
+            renderMessages(scrollDown);
+            return;
+          }
+          if (!state.token || !state.channelId) return;
+          const feed = $('feedScroll');
+          const nearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 90;
+          const data = await discordApi(`/channels/${state.channelId}/messages?limit=50`);
+          if (Array.isArray(data)) {
+            state.messages = data.slice().reverse();
+            updateStatusUI();
+            renderMessages(scrollDown || nearBottom);
+          }
+        } catch (err) {
+          if (scrollDown) notify(err.message);
+        } finally {
+          state.busy = false;
+        }
+      }
+
+      async function sendMessage() {
+        const text = $('msgInput').value.trim();
+        if (!text) return;
+        $('sendBtn').disabled = true;
+
+        try {
+          if (state.demoMode) {
+            const item = {
+              id: String(Date.now()),
+              content: text,
+              timestamp: new Date().toISOString(),
+              author: { id: state.botUser.id, username: state.botUser.username, bot: true, avatar: null },
+              referenced_message: state.replyTo
+                ? { id: state.replyTo.id, content: state.replyTo.content, author: { username: state.replyTo.username } }
+                : null,
+              attachments: []
+            };
+            if (!state.demoData[state.channelId]) state.demoData[state.channelId] = [];
+            state.demoData[state.channelId].push(item);
+            $('msgInput').value = '';
+            resizeInput();
+            clearReply();
+            await loadMessages(true);
+            return;
+          }
+
+          const body = { content: text };
+          if (state.replyTo) {
+            body.message_reference = {
+              message_id: state.replyTo.id,
+              channel_id: state.channelId,
+              fail_if_not_exists: false
+            };
+          }
+
+          await discordApi(`/channels/${state.channelId}/messages`, { method: 'POST', body });
+          $('msgInput').value = '';
+          resizeInput();
+          clearReply();
+          await loadMessages(true);
+        } catch (err) {
+          notify(err.message);
+        } finally {
+          updateSendState();
+          $('msgInput').focus();
+        }
+      }
+
+      async function deleteMessage(id) {
+        try {
+          if (state.demoMode) {
+            state.demoData[state.channelId] = (state.demoData[state.channelId] || []).filter(m => m.id !== id);
+            await loadMessages(false);
+            return;
+          }
+          await discordApi(`/channels/${state.channelId}/messages/${id}`, { method: 'DELETE' });
+          state.messages = state.messages.filter(m => m.id !== id);
+          renderMessages(false);
+        } catch (err) {
+          notify(err.message);
+        }
+      }
+
+      function avatarSrc(user) {
+        if (!user?.avatar) return '';
+        const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+        return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=64`;
+      }
+
+      function esc(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function formatText(raw, mentions = []) {
+        if (!raw) return '';
+        const blocks = [];
+        let s = raw.replace(/```(?:\w+)?\n?([\s\S]*?)```/g, (_, code) => {
+          blocks.push(`<pre class="code-block">${esc(code.replace(/\n$/, ''))}</pre>`);
+          return `\x00B${blocks.length - 1}\x00`;
+        });
+        const inline = [];
+        s = s.replace(/`([^`\n]+)`/g, (_, code) => {
+          inline.push(`<code class="inline-code">${esc(code)}</code>`);
+          return `\x00I${inline.length - 1}\x00`;
+        });
+        s = esc(s)
+          .replace(/&lt;@!?(\d+)&gt;/g, (_, id) => {
+            const u = Array.isArray(mentions) ? mentions.find(m => m.id === id) : null;
+            return `<span class="mention-tag">@${esc(u ? u.username : id.slice(-4))}</span>`;
+          })
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" class="underline break-all">$1</a>')
+          .replace(/\n/g, '<br />');
+        s = s.replace(/\x00I(\d+)\x00/g, (_, i) => inline[+i] || '');
+        s = s.replace(/\x00B(\d+)\x00/g, (_, i) => blocks[+i] || '');
+        return s;
+      }
+
+      function renderMessages(scrollDown) {
+        const list = $('messageList');
+        if (!state.messages.length) {
+          list.innerHTML = '<p class="text-xs text-dim py-10 text-center">No messages in this channel.</p>';
+          return;
+        }
+
+        list.innerHTML = state.messages.map(m => {
+          const author = m.author || { username: 'unknown', bot: false };
+          const img = avatarSrc(author);
+          const init = esc((author.username || '?')[0].toUpperCase());
+          const time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const canDelete = state.demoMode || author.id === state.botUser?.id;
+
+          const ref = m.referenced_message
+            ? `<div class="text-[11px] text-dim mb-1 pl-10 truncate">↳ <span class="text-muted font-medium">@${esc(m.referenced_message.author?.username || 'user')}</span> ${esc((m.referenced_message.content || '').slice(0, 75))}</div>`
+            : '';
+
+          const atts = Array.isArray(m.attachments) && m.attachments.length
+            ? `<div class="mt-1.5 flex flex-wrap gap-2">${m.attachments.map(a =>
+                (a.content_type || '').startsWith('image/')
+                  ? `<a href="${esc(a.url)}" target="_blank" rel="noopener"><img src="${esc(a.url)}" alt="${esc(a.filename)}" class="max-h-56 rounded border border-base" /></a>`
+                  : `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="text-xs underline text-muted">${esc(a.filename)}</a>`
+              ).join('')}</div>`
+            : '';
+
+          return `
+            <div class="msg-row relative rounded px-2.5 py-2 transition-colors">
+              ${ref}
+              <div class="flex items-start gap-2.5">
+                ${img
+                  ? `<img src="${esc(img)}" alt="" class="w-8 h-8 rounded border border-base object-cover shrink-0 mt-0.5" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div style="display:none" class="w-8 h-8 rounded bg-panel border border-base shrink-0 mt-0.5 items-center justify-center text-xs font-semibold">${init}</div>`
+                  : `<div class="w-8 h-8 rounded bg-panel border border-base shrink-0 mt-0.5 flex items-center justify-center text-xs font-semibold">${init}</div>`
+                }
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-sm font-medium ${author.bot ? 'text-accent' : ''}">${esc(author.username)}</span>
+                    ${author.bot ? '<span class="text-[10px] mono px-1.5 py-0.2 rounded" style="background:var(--badge-bg);color:var(--badge-fg)">BOT</span>' : ''}
+                    <span class="text-[11px] text-dim mono">${time}</span>
+                  </div>
+                  <div class="text-sm leading-relaxed break-words mt-0.5">${formatText(m.content, m.mentions)}</div>
+                  ${atts}
+                </div>
+              </div>
+              <div class="msg-tools opacity-0 pointer-events-none transition-opacity absolute top-1.5 right-2 bg-surface border border-base rounded flex text-[11px]">
+                <button type="button" data-reply="${esc(m.id)}" class="px-2 py-1 text-muted hover:text-main">Reply</button>
+                ${canDelete ? `<button type="button" data-del="${esc(m.id)}" class="px-2 py-1 text-muted hover:text-main border-l border-base">Delete</button>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (scrollDown) {
+          const feed = $('feedScroll');
+          feed.scrollTop = feed.scrollHeight;
+        }
+      }
+
+      function updateStatusUI() {
+        const name = state.botUser?.username || 'TsuneBot';
+        $('botNameLabel').textContent = name;
+        const img = avatarSrc(state.botUser);
+        $('botAvatar').innerHTML = img
+          ? `<img src="${esc(img)}" alt="" class="w-full h-full object-cover" />`
+          : esc(name[0].toUpperCase());
+
+        if (state.demoMode) {
+          $('statusBadgeText').textContent = 'Demo Mode';
+          $('sidebarStatusSub').textContent = 'local demo';
+          $('modeToggleBtn').textContent = 'Mode: Demo Mode';
+        } else {
+          $('statusBadgeText').textContent = `Connected · ${name}`;
+          $('sidebarStatusSub').textContent = `ID ${state.botUser?.id || ''}`;
+          $('modeToggleBtn').textContent = 'Mode: Live Discord API';
+        }
+
+        const ch = state.channels.find(c => c.id === state.channelId);
+        const chName = ch ? ch.name : state.channelId;
+        $('channelHeading').textContent = chName;
+        $('channelSubtext').textContent = ch?.topic || `Posting as ${name}`;
+        $('msgInput').placeholder = `Message #${chName}...`;
+      }
+
+      function setReply(msg) {
+        state.replyTo = {
+          id: msg.id,
+          username: msg.author?.username || 'user',
+          content: (msg.content || '').slice(0, 60)
+        };
+        $('replyAuthor').textContent = `@${state.replyTo.username}`;
+        $('replySnippet').textContent = state.replyTo.content;
+        $('replyBanner').classList.remove('hidden');
+        $('composerWrap').classList.remove('rounded-md');
+        $('composerWrap').classList.add('rounded-b-md');
+        $('msgInput').focus();
+      }
+
+      function clearReply() {
+        state.replyTo = null;
+        $('replyBanner').classList.add('hidden');
+        $('composerWrap').classList.add('rounded-md');
+        $('composerWrap').classList.remove('rounded-b-md');
+      }
+
+      function resizeInput() {
+        const el = $('msgInput');
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 144) + 'px';
+        $('charCount').textContent = `${el.value.length}/2000`;
+        updateSendState();
+      }
+
+      function updateSendState() {
+        $('sendBtn').disabled = !$('msgInput').value.trim();
+      }
+
+      function resetPolling() {
+        clearInterval(state.timer);
+        if (state.pollMs > 0) {
+          state.timer = setInterval(() => {
+            if (!state.demoMode && state.token && state.channelId) loadMessages(false);
+          }, state.pollMs);
+        }
+      }
+
+      function openSidebar() {
+        $('sidebar').classList.remove('-translate-x-full');
+        $('sidebarBackdrop').classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        $('sidebar').classList.add('-translate-x-full');
+        $('sidebarBackdrop').classList.add('hidden');
+      }
+
+      function openSettings() {
+        $('tokenInput').value = state.token;
+        $('proxyInput').value = state.proxy;
+        $('pollSelect').value = String(state.pollMs);
+        $('disconnectBtn').classList.toggle('hidden', !state.token);
+        $('settingsModal').classList.remove('hidden');
+      }
+
+      function closeSettings() {
+        $('settingsModal').classList.add('hidden');
+      }
+
+      function bindEvents() {
+        $('sidebarOpenBtn').addEventListener('click', openSidebar);
+        $('sidebarCloseBtn').addEventListener('click', closeSidebar);
+        $('sidebarBackdrop').addEventListener('click', closeSidebar);
+
+        $('settingsBtn').addEventListener('click', openSettings);
+        $('noticeActionBtn').addEventListener('click', openSettings);
+        $('closeSettingsBtn').addEventListener('click', closeSettings);
+        $('settingsModal').addEventListener('click', e => {
+          if (e.target === $('settingsModal')) closeSettings();
+        });
+
+        $('toggleTokenBtn').addEventListener('click', () => {
+          const inp = $('tokenInput');
+          const show = inp.type === 'password';
+          inp.type = show ? 'text' : 'password';
+          $('toggleTokenBtn').textContent = show ? 'Hide' : 'Show';
+        });
+
+        $('testConnBtn').addEventListener('click', () => connectBot(false));
+        $('disconnectBtn').addEventListener('click', clearToken);
+
+        $('guildSelect').addEventListener('change', async () => {
+          state.guildId = $('guildSelect').value;
+          saveSettings();
+          await loadChannels(state.guildId, true);
+        });
+
+        $('channelList').addEventListener('click', e => {
+          const btn = e.target.closest('[data-ch]');
+          if (btn) selectChannel(btn.dataset.ch);
+        });
+
+        $('useChannelIdBtn').addEventListener('click', async () => {
+          const id = $('directChannelInput').value.trim();
+          if (!id) return;
+          if (!state.channels.some(c => c.id === id)) {
+            state.channels.unshift({ id, name: id, topic: 'Direct channel ID' });
+          }
+          $('directChannelInput').value = '';
+          await selectChannel(id);
+        });
+
+        $('modeToggleBtn').addEventListener('click', async () => {
+          if (state.demoMode) {
+            if ($('tokenInput').value.trim()) {
+              await connectBot(false);
+            } else {
+              notify('Enter a Discord bot token first');
+            }
+          } else {
+            enableDemoMode();
+          }
+        });
+
+        $('saveBtn').addEventListener('click', async () => {
+          const nextToken = $('tokenInput').value.trim();
+          state.proxy = $('proxyInput').value.trim();
+          state.pollMs = Number($('pollSelect').value);
+          resetPolling();
+          saveSettings();
+          if (nextToken && nextToken !== state.token) {
+            await connectBot(false);
+          } else if (!state.demoMode && state.token) {
+            await loadMessages(true);
+          }
+          closeSettings();
+        });
+
+        $('refreshBtn').addEventListener('click', () => loadMessages(true));
+        $('cancelReplyBtn').addEventListener('click', clearReply);
+
+        $('messageList').addEventListener('click', async e => {
+          const replyBtn = e.target.closest('[data-reply]');
+          if (replyBtn) {
+            const msg = state.messages.find(m => m.id === replyBtn.dataset.reply);
+            if (msg) setReply(msg);
+            return;
+          }
+          const delBtn = e.target.closest('[data-del]');
+          if (delBtn) {
+            await deleteMessage(delBtn.dataset.del);
+          }
+        });
+
+        $('msgInput').addEventListener('input', resizeInput);
+        $('msgInput').addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+        $('sendBtn').addEventListener('click', sendMessage);
+
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape') {
+            if (!$('settingsModal').classList.contains('hidden')) closeSettings();
+            else if (!$('sidebar').classList.contains('-translate-x-full')) closeSidebar();
+            else if (state.replyTo) clearReply();
+          }
+        });
+      }
+
+      async function init() {
+        loadSettings();
+        renderThemeButtons();
+        applyTheme(state.theme);
+        bindEvents();
+
+        if (!state.demoMode && state.token) {
+          $('tokenInput').value = state.token;
+          $('proxyInput').value = state.proxy;
+          await connectBot(true);
+        } else {
+          populateGuilds();
+          renderChannelList();
+          updateStatusUI();
+          await loadMessages(true);
+        }
+        resetPolling();
+      }
+
+      window.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+</body>
+</html>
